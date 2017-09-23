@@ -83,10 +83,10 @@ public class SimpleParser {
 	}
 	
 //	Declaration :: =  VariableDeclaration     |    ImageDeclaration   |   SourceSinkDeclaration  
-//	VariableDeclaration  ::=  VarType IDENTIFIER  (  OP_ASSIGN  Expression  | ε )
+//	VariableDeclaration  ::=  VarType IDENTIFIER  (  OP_ASSIGN  Expression  | NULL )
 //	VarType ::= KW_int | KW_boolean
 
-//	ImageDeclaration ::=  KW_image  (LSQUARE Expression COMMA Expression RSQUARE | ε) IDENTIFIER ( OP_LARROW Source | ε )   
+//	ImageDeclaration ::=  KW_image  (LSQUARE Expression COMMA Expression RSQUARE | NULL) IDENTIFIER ( OP_LARROW Source | NULL )   
 
 //	SourceSinkDeclaration ::= SourceSinkType IDENTIFIER  OP_ASSIGN  Source
 //	SourceSinkType := KW_url | KW_file
@@ -132,7 +132,7 @@ public class SimpleParser {
 //		| ImageInStatement    
 
 //	AssignmentStatement ::= Lhs OP_ASSIGN Expression	
-//					 Lhs::=  IDENTIFIER ( LSQUARE LhsSelector RSQUARE   | ε )
+//					 Lhs::=  IDENTIFIER ( LSQUARE LhsSelector RSQUARE   | NULL )
 //	ImageOutStatement ::= IDENTIFIER OP_RARROW Sink 
 //	ImageInStatement ::= IDENTIFIER OP_LARROW Source
 	void statement() throws SyntaxException{
@@ -193,7 +193,7 @@ public class SimpleParser {
 		}
 	}
 	
-//	Lhs::=  IDENTIFIER ( LSQUARE LhsSelector RSQUARE   | ε )
+//	Lhs::=  IDENTIFIER ( LSQUARE LhsSelector RSQUARE   | NULL )
 //	LhsSelector ::= LSQUARE  ( XySelector  | RaSelector  )   RSQUARE
 //	XySelector ::= KW_x COMMA KW_y
 //	RaSelector ::= KW_r COMMA KW_A

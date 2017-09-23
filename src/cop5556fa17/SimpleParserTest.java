@@ -271,7 +271,7 @@ public class SimpleParserTest {
 	}
 //	@Test
 //	public void expression6() throws SyntaxException, LexicalException {
-//		String input = "class6 A  [x = @[a+b, !b<<s, [->]; y=@[ @@[a+b:[s:string->a=b;]]];] ";
+//		String input = "12";
 //		show(input);
 //		try {
 //			Scanner scanner = new Scanner(input).scan();  
@@ -286,7 +286,7 @@ public class SimpleParserTest {
 //	}
 //	@Test
 //	public void expression7() throws SyntaxException, LexicalException {
-//		String input = "class7 A  [ \n x = @[a,b,c]; \n y = @[d,e,f]+x; \n ]  ";
+//		String input = "1";
 //		show(input);
 //		try {
 //			Scanner scanner = new Scanner(input).scan();  

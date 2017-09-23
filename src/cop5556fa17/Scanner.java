@@ -471,7 +471,7 @@ public class Scanner {
 		                    	state = State.STR; pos++;
 		                    }
 		            		
-//		            		input char = ‘ ‘, '\t, '\n', ‘\r', '\f'
+//		            		input char = ' ', '\t, '\n', '\r', '\f'
 		                    else if (Character.isWhitespace(ch)){	
 		                    	if(ch=='\r'){
 		                    		if(pos<chars.length-2 && chars[pos+1]=='\n')	//CHECK: last input char is at pos chars.length-2    
