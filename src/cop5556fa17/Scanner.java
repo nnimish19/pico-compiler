@@ -149,6 +149,9 @@ public class Scanner {
 			}
 			else return String.copyValueOf(chars, pos, length);
 		}
+		public boolean isKind(Kind k){
+			return this.kind==k;
+		}
 
 		/**
 		 * To get the text of a StringLiteral, we need to remove the
