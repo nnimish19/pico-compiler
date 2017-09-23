@@ -123,16 +123,14 @@ public class ScannerTest {
 		String input = ";;\n;;";
 		Scanner scanner = new Scanner(input).scan();
 		show(input);
-		System.out.print("scanner ouput:");
 		show(scanner);
-		System.out.print("\n");
-		checkNext(scanner, SEMI, 0, 1, 1, 1);	//position, length, line, pos in line 
+		checkNext(scanner, SEMI, 0, 1, 1, 1);//Scanner scanner, Scanner.Kind kind, int pos, int length, int line, int pos_in_line)
 		checkNext(scanner, SEMI, 1, 1, 1, 2);
 		checkNext(scanner, SEMI, 3, 1, 2, 1);
 		checkNext(scanner, SEMI, 4, 1, 2, 2);
 		checkNextIsEOF(scanner);
 	}
-	
+		
 	/**
 	 * This example shows how to test that your scanner is behaving when the
 	 * input is illegal.  In this case, we are giving it a String literal
@@ -166,5 +164,282 @@ public class ScannerTest {
 		}
 	}
 
+	@Test
+	public void testGeneral1() throws LexicalException {
+		String input = "a+=b";
+		show(input);
+		try{
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		}catch(LexicalException e){
+			show(e);
+			throw e;
+		}
+		
+		
+	}
+	@Test
+	public void testGeneral2() throws LexicalException {
+		String input = "a+ =b";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+	}
+	@Test
+	public void testGeneral3() throws LexicalException {
+		String input = "false == truely yours";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+	}
+	@Test
+	public void testGeneral4() throws LexicalException {
+		String input = "true>>0123";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+	}
+	@Test
+	public void testGeneral5() throws LexicalException {
+		String input = "if(a!=b)print\n \"do\nne\"; ";
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral6() throws LexicalException {
+		String input = "sin(a!=b)print \"done\"; ";
+		show(input);
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral7() throws LexicalException {
+		String input = "SIN(a!=b)print \"done\"; //halo";
+		show(input);
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral8() throws LexicalException {
+		String input = "a,b,c\n****\n***";
+		show(input);
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral9() throws LexicalException {
+		String input = "[9][\"/\"//b/\"\"]]";		//	"/"//b/""	>look closely, its a string followed by comment		
+		show(input);
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral10() throws LexicalException {
+		String input = "[10]\"str\n\" ?";	//No ending quote found for string starting at line:position 1:1 
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral11() throws LexicalException {
+		String input = "[11]\"abc\t\"";		//length of string =6
+		show(input);
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral12() throws LexicalException {
+		String input = "[12]\"\\\t\"";		//invalid string. input = "\   "
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral13() throws LexicalException {
+		String input = "[13]\"\\t\"";		//invalid string. input = "\t"
+		show(input);
+//		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral14() throws LexicalException {
+		String input = "[14]\"\\a\"";		//"\a"		//Illegal backslash encountered in string starting at line:position 1:1
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
 
+	@Test
+	public void testGeneral15() throws LexicalException {
+		String input = "[15]\"\\\t\"";		//"\	"	//Illegal backslash encountered in string starting at line:position 1:1
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral16() throws LexicalException {
+		String input = "[16]\"\\\\t\"";		//"\\t"
+		show(input);
+//		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral17() throws LexicalException {
+		String input = "[17]\"\\\\\\n\"";		//	"\\\n"
+		show(input);
+//		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral18() throws LexicalException {
+		String input = "[18][\" \\\\\" \"]";  //[" \\" "]		//No ending quote found for string starting at line:position 1:8
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}	
+	@Test
+	public void testGeneral19() throws LexicalException {
+		String input = "[19][[\"\\\\\\\"]]";	//  [["\\\"]]
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral20() throws LexicalException {
+		String input = "[20][\"\\\\\\\"\"]]";	//  [["\\\""]] 
+		show(input);
+//		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral21() throws LexicalException {
+		String input = "   \r\n    \r\n   ";//"b\bab"; //"\"abc\\\"a\"";//"\"abc\\\"a"; //"\" greet\\ings\"";//2147483647";	//  [["\\\""]] 
+		show(input);
+//		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral22() throws LexicalException {
+		String input = "/ /// Hoping this is /// still in comment. \r\n / //";//"b\bab"; //"\"abc\\\"a\"";//"\"abc\\\"a"; //"\" greet\\ings\"";//2147483647";	//  [["\\\""]] 
+		show(input);
+//		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
+	@Test
+	public void testGeneral23() throws LexicalException {
+		String input = "<=<<- ->>=<<-";//"<---> <--";	//" ->>= ->>>= "; 
+		show(input);
+//		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			Scanner scanner = new Scanner(input).scan();
+			show(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			throw e;
+		}
+	}
 }
