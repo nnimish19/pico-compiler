@@ -237,7 +237,7 @@ public class SimpleParser {
 		//TODO implement this.
 //		throw new UnsupportedOperationException();
 		orExp();
-		if(t.isKind(OP_Q)){		//for 0 or more times; manually check using if-statement. and don't use match() function. 
+		while(t.isKind(OP_Q)){		//for 0 or more times; manually check using if-statement. and don't use match() function. 
 			consume();
 			expression();
 			match(OP_COLON);	//Must match. if does not match throw error; 
