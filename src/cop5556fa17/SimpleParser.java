@@ -237,7 +237,7 @@ public class SimpleParser {
 		//TODO implement this.
 //		throw new UnsupportedOperationException();
 		orExp();
-		while(t.isKind(OP_Q)){		//for 0 or more times; manually check using if-statement. and don't use match() function. 
+		if(t.isKind(OP_Q)){		//for 0 or more times; manually check using if-statement. and don't use match() function. 
 			consume();
 			expression();
 			match(OP_COLON);	//Must match. if does not match throw error; 
@@ -340,14 +340,14 @@ public class SimpleParser {
 		
 	}
 	
-//	Primary ::= INTEGER_LITERAL | LPAREN Expression RPAREN | FunctionApplication
+//	Primary ::= INTEGER_LITERAL | LPAREN Expression RPAREN | FunctionApplication | BOOLEAN_LITERAL
 //	FunctionApplication ::= FunctionName LPAREN Expression RPAREN  
 //						 | FunctionName  LSQUARE Selector RSQUARE 
 //	FunctionName ::= KW_sin | KW_cos | KW_atan | KW_abs 
 //					| KW_cart_x | KW_cart_y | KW_polar_a | KW_polar_r
 //	Selector ::=  Expression COMMA Expression   
 	boolean primary() throws SyntaxException{	//RETURN TRUE if primary begins. else false
-		if(t.isKind(INTEGER_LITERAL)){
+		if(t.isKind(INTEGER_LITERAL) || t.isKind(BOOLEAN_LITERAL)){
 			consume();
 			return true;
 		}
