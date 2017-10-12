@@ -424,7 +424,7 @@ public class Parser {
 			consume();
 		}
 		else if(t.isKind(BOOLEAN_LITERAL)){
-			boolean b=t.getText()=="true"?true:false;
+			boolean b=(t.getText().equals("true")?true:false);
 			e=new Expression_BooleanLit(first, b);
 			consume();
 		}
