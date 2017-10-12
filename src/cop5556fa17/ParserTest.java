@@ -257,7 +257,8 @@ public class ParserTest {
 			Scanner scanner = new Scanner(input).scan();  
 //			show(scanner);   
 			Parser parser = new Parser(scanner);
-			parser.parse();  //Call expression directly.  
+			Program ast = parser.parse();  //Call expression directly.
+			show(ast);
 		}
 		catch (Exception e) {	//SyntaxException, LexicalException
 			show(e);
