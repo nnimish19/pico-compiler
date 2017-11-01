@@ -492,4 +492,23 @@ public class ParserTest {
 		Sink_Ident si2=(Sink_Ident)dv2.sink;
 		assertEquals(si2.name,"abcdpng");
 	}
+	
+	@Test
+	public void testcase21() throws SyntaxException, LexicalException {
+		String input =  "p image1 = Z;";
+		show(input);
+		Scanner scanner = new Scanner(input).scan();  
+		show(scanner);   
+		Parser parser = new Parser(scanner);
+//		thrown.expect(SyntaxException.class);
+		try {
+			Program ast=parser.program();  //Parse the program
+			show(ast);
+		}
+		catch (SyntaxException e) {
+			show(e);
+			throw e;
+		}  
+//		expected:<...tement_Assign [lhs=n[ame [name=image1, index=null]], e=Expression_Prede...> but was:<...tement_Assign [lhs=n[ull], e=Expression_Prede...>
+	}
 }

@@ -152,7 +152,7 @@ public class Parser {
 		match(IDENTIFIER);
 //		AssignmentStatement: Statement_Assign(Token firstToken, LHS lhs, Expression e)
 		if(t.isKind(OP_ASSIGN)||t.isKind(LSQUARE)){
-			LHS lhs=null;
+			LHS lhs=new LHS(first, first, null);
 			
 			if (t.isKind(LSQUARE)){	//Note this is optional. 
 				consume();
