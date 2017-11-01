@@ -1,6 +1,7 @@
 package cop5556fa17;
 
 import java.net.*;
+
 import static cop5556fa17.Scanner.Kind.KW_boolean;
 import static cop5556fa17.Scanner.Kind.KW_int;
 import cop5556fa17.AST.*;
@@ -86,7 +87,6 @@ public class TypeCheckVisitor implements ASTVisitor {
 			throw new SemanticException(dv.firstToken, "Error: Variable re-declared");
 		}
 		
-		symTab.put(dv.name, dv);
 		
 		Type t= TypeUtils.getType(dv.type);		//		throw error if type not found
 		if(t == null){
@@ -101,6 +101,8 @@ public class TypeCheckVisitor implements ASTVisitor {
 				throw new SemanticException(dv.firstToken, "Error: visitDeclaration_Variable: Type mismatch");
 			}
 		}
+		
+		symTab.put(dv.name, dv);
 		
 		return null;
 	}
@@ -119,7 +121,6 @@ public class TypeCheckVisitor implements ASTVisitor {
 			throw new SemanticException(di.firstToken, "Error: Variable re-declared");
 		}
 		
-		symTab.put(di.name, di);
 		di.setType(TypeUtils.Type.IMAGE);
 		
 		if(di.xSize!=null && di.ySize!=null){
@@ -132,6 +133,12 @@ public class TypeCheckVisitor implements ASTVisitor {
 		else if(di.xSize!=null || di.ySize!=null){
 			throw new SemanticException(di.firstToken, "Error: Declaration_Image: xSize or ySize null");
 		}
+		
+		if(di.source!=null){
+			di.source.visit(this, arg);
+		}
+		
+		symTab.put(di.name, di);
 		return null;
 	}
 	
@@ -150,7 +157,6 @@ public class TypeCheckVisitor implements ASTVisitor {
 			throw new SemanticException(ds.firstToken, "Error: Variable re-declared");
 		}
 		
-		symTab.put(ds.name, ds);		//KW_url | KW_file
 		
 		Type t= TypeUtils.getType(ds.type);		//		throw error if type not found
 		if(t == null){
@@ -164,6 +170,8 @@ public class TypeCheckVisitor implements ASTVisitor {
 		ds.source.visit(this, arg);
 		if(ds.source.getType()!=ds.getType())
 			throw new SemanticException(ds.firstToken, "Error: Declaration_SourceSink.Type != Source.Type");
+		
+		symTab.put(ds.name, ds);		//KW_url | KW_file
 		
 		return null;
 	}
@@ -264,7 +272,8 @@ public class TypeCheckVisitor implements ASTVisitor {
 				Expression_PredefinedName exp1= (Expression_PredefinedName)index.e1;
 				index.setCartesian(!(exp0.kind==Kind.KW_r&& exp1.kind==Kind.KW_a));	
 			}catch(Exception e){
-				throw new SemanticException(index.firstToken, e.getMessage());//"Error: Expected index.expression to be Expression_PredefinedName");
+				index.setCartesian(true);
+//				throw new SemanticException(index.firstToken, e.getMessage());//"Error: Expected index.expression to be Expression_PredefinedName");
 			}
 		}
 		else{
@@ -293,6 +302,9 @@ public class TypeCheckVisitor implements ASTVisitor {
 		if(lhs.index!=null){							//do we need to throw exception or handle if statement. I guess just handle if. bcz index can be null
 			lhs.index.visit(this, arg);
 			lhs.setCartesian(lhs.index.isCartesian());
+		}
+		else{
+			lhs.setCartesian(false);
 		}
 		return null;
 	}
@@ -416,8 +428,20 @@ public class TypeCheckVisitor implements ASTVisitor {
 		else if((eb.op == Kind.OP_AND || eb.op == Kind.OP_OR) && (eb.e0.getType()==Type.BOOLEAN || eb.e0.getType()==Type.INTEGER)){
 			eb.setType(eb.e0.getType());
 		}
-		else if((eb.op == Kind.OP_DIV ||eb.op == Kind.OP_MINUS ||eb.op == Kind.OP_PLUS ||eb.op == Kind.OP_POWER ||eb.op == Kind.OP_TIMES)&&(eb.e0.getType()==Type.INTEGER)){
+		else if((eb.op == Kind.OP_DIV ||eb.op == Kind.OP_MINUS || eb.op == Kind.OP_MOD ||eb.op == Kind.OP_PLUS ||eb.op == Kind.OP_POWER ||eb.op == Kind.OP_TIMES)&&(eb.e0.getType()==Type.INTEGER)){
 			eb.setType(eb.e0.getType());
+			if(eb.op == Kind.OP_DIV || eb.op == Kind.OP_MOD){
+				Expression_IntLit inte;
+				try{
+					inte = (Expression_IntLit)eb.e1;
+				}
+				catch(Exception e){
+					return null;
+				}
+				if(inte.value==0){
+					throw new SemanticException(eb.firstToken, "Error: cannot divide by zero");
+				}
+			}
 		}
 		else{
 			throw new SemanticException(eb.firstToken, "Error: invalid binary expression");
@@ -479,11 +503,15 @@ public class TypeCheckVisitor implements ASTVisitor {
 			throws Exception {
 		
 		Declaration dec= symTab.get(eps.name);
+
 		if(dec==null){
 			throw new SemanticException(eps.firstToken, "Error: variable declaration not found");
 		}
-		if(dec.getType()==Type.IMAGE)
+		if(dec.getType()==Type.IMAGE){
 			eps.setType(Type.INTEGER);
+			if(eps.index!=null)
+				eps.index.visit(this, arg);
+		}
 		else if(eps.index==null)
 			eps.setType(dec.getType());
 		else
@@ -548,7 +576,9 @@ public class TypeCheckVisitor implements ASTVisitor {
 			Object arg) throws Exception {
 		
 		indarg.setType(Type.INTEGER);
-		
+		if(indarg.arg!=null){	//do function args need to be integers?
+			indarg.arg.visit(this, arg);
+		}
 		return null;
 	}
 
