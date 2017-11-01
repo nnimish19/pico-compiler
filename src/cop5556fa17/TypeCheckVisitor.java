@@ -70,11 +70,11 @@ public class TypeCheckVisitor implements ASTVisitor {
 		return program.name;
 	}
 
-//	Declaration_Variable ::=  Type name (Expression | ε )
-//			REQUIRE:  symbolTable.lookupType(name) = Ʇ
+//	Declaration_Variable ::=  Type name (Expression | null )
+//			REQUIRE:  symbolTable.lookupType(name) = $
 //		              symbolTable.insert(name, Declaration_Variable)
 //			Declaration_Variable.Type <= Type
-//		               REQUIRE if (Expression !=  ε) Declaration_Variable.Type == Expression.Type
+//		               REQUIRE if (Expression !=  null) Declaration_Variable.Type == Expression.Type
 	@Override
 	public Object visitDeclaration_Variable(
 			Declaration_Variable dv, Object arg)	//declaration_Variable
@@ -106,11 +106,11 @@ public class TypeCheckVisitor implements ASTVisitor {
 	}
 
 	
-//	Declaration_Image  ::= name (  xSize ySize | ε) Source
-//			REQUIRE:  symbolTable.lookupType(name) = Ʇ
+//	Declaration_Image  ::= name (  xSize ySize | null) Source
+//			REQUIRE:  symbolTable.lookupType(name) = $
 //		    symbolTable.insert(name, Declaration_Image)
 //			Declaration_Image.Type <= IMAGE   
-//		               REQUIRE if xSize != ε then ySize != ε && xSize.Type == INTEGER && ySize.type == INTEGER
+//		               REQUIRE if xSize != null then ySize != null && xSize.Type == INTEGER && ySize.type == INTEGER
 	@Override
 	public Object visitDeclaration_Image(Declaration_Image di,	//declaration_Image
 			Object arg) throws Exception {
@@ -137,7 +137,7 @@ public class TypeCheckVisitor implements ASTVisitor {
 	
 	
 //	Declaration_SourceSink  ::= Type name  Source
-//          	REQUIRE:  symbolTable.lookupType(name) = Ʇ
+//          	REQUIRE:  symbolTable.lookupType(name) = $
 //           symbolTable.insert(name, Declaration_SourceSink)
 //Declaration_SourceSink.Type <= Type
 //           REQUIRE Source.Type == Declaration_SourceSink.Type
@@ -385,7 +385,7 @@ public class TypeCheckVisitor implements ASTVisitor {
 	
 //---------------------------------------------------------------
 //	Expression_Binary ::= Expression0 op Expression1
-//	REQUIRE:  Expression0.Type == Expression1.Type  && Expression_Binary.Type ≠ Ʇ
+//	REQUIRE:  Expression0.Type == Expression1.Type  && Expression_Binary.Type ≠ $
 //	Expression_Binary.type <=   
 //		 if op ∈ {EQ, NEQ} then BOOLEAN
 //		 else if (op ∈ {GE, GT, LT, LE} && Expression0.Type == INTEGER) then BOOLEAN
@@ -393,7 +393,7 @@ public class TypeCheckVisitor implements ASTVisitor {
 //			then Expression0.Type
 //		 else if op ∈ {DIV, MINUS, MOD, PLUS, POWER, TIMES} && Expression0.Type == INTEGER
 //			then INTEGER
-//		else Ʇ
+//		else $
 	@Override
 	public Object visitExpression_Binary(Expression_Binary eb,	//expression_Binary
 			Object arg) throws Exception {
@@ -443,8 +443,8 @@ public class TypeCheckVisitor implements ASTVisitor {
 //				let t = Expression.Type in 
 //		            if op ∈ {EXCL} && (t == BOOLEAN || t == INTEGER) then t
 //		            else if op {PLUS, MINUS} && t == INTEGER then INTEGER
-//				    else Ʇ
-//		    REQUIRE:  Expression_ Unary.Type ≠ Ʇ   
+//				    else $
+//		    REQUIRE:  Expression_ Unary.Type ≠ $   
 	@Override
 	public Object visitExpression_Unary(Expression_Unary eu,	//expression_Unary
 			Object arg) throws Exception {
@@ -471,8 +471,8 @@ public class TypeCheckVisitor implements ASTVisitor {
 //         	name.Type <= SymbolTable.lookupType(name)
 //	Expression_PixelSelector.Type <=  if name.Type == IMAGE then INTEGER 
 //                                    else if Index == null then name.Type
-//                                    else  Ʇ
-//              REQUIRE:  Expression_PixelSelector.Type ≠ Ʇ
+//                                    else  $
+//              REQUIRE:  Expression_PixelSelector.Type ≠ $
 	@Override
 	public Object visitExpression_PixelSelector(
 			Expression_PixelSelector eps, Object arg)	//expression_PixelSelector
