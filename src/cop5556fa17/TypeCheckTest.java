@@ -111,6 +111,73 @@ public class TypeCheckTest {
 	 thrown.expect(SemanticException.class);
 	 typeCheck(input);
 	 }
+	 
+	 @Test
+	 public void testUndec1() throws Exception {
+	 String input = "prog "
+		        + " int k; "
+		        + " image[56/34,67/34] cgh ; "
+		        + " image svf <- @(x+y+2/4*5*r*Z);"
+		        + " image vkdj ; "
+		        + " boolean k1 = true;"
+		        + " int k2 = a + 76/9 * 67; "
+		        + " url vgjvbhvj = \"https://web.whatsapp.com/\"; "
+//		        + " url fbdjob = \"vjsdlv\" ;"
+//		        + " url fbdjob = vjsdlv ;"
+		        + " file file_name = @(x+y+a*X) ; "
+		        + " //this is a commment  ; ";
+//prog  int k;  image[56/34,67/34] cgh ;  image svf <- @(x+y+2/4*5*r*Z); image vkdj ;  /boolean k = true; int k = a + 76/9 * 67;  url vgjvbhvj = "vhvjhm";  url fbdjob = vjsdlv ; file file_name = @(x+y+a*X) ;  //this is a commment  ; 
+//prog  int k;  image[56/34,67/34] cgh ;  image svf <- @(x+y+2/4*5*r*Z); image vkdj ;  boolean k1 = true; int k2 = a + 76/9 * 67;  url vgjvbhvj = "https://web.whatsapp.com/";  file file_name = @(x+y+a*X) ;  //this is a commment  ; 
+ 
+	 
+	 thrown.expect(SemanticException.class);
+	 typeCheck(input);
+	 }
+	 
+	 @Test
+	 public void testUndec2() throws Exception {
+	 String input = "imageProgram image imageName;"
+				+ "\n imageName->abcdpng; "
+				+ "\n imageName -> SCREEN; "
+				+ "\n imageName <- \"awesome\";"
+				+ "\n imageName <- @express; \n"
+				+ "\n imageName <- abcdpng;";
+	 thrown.expect(SemanticException.class);
+	 typeCheck(input);
+	 }
 
+	 @Test
+	 public void testUndec3() throws Exception {
+	 String input = "assign int abc=123456;\n"
+				+ "abc[[x,y]]=123456;\n"
+				+ "abc[[r,A]]=123244;\n";
+//	 thrown.expect(SemanticException.class);
+	 typeCheck(input);
+	 }
+	 
+	 @Test
+	 public void testUndec4() throws Exception {
+	 String input ="prog image[10,png] imageName <- imagepng; \n boolean ab=true;";
+	 thrown.expect(SemanticException.class);
+	 typeCheck(input);
+	 }
+	 
+	 @Test
+	 public void testUndec5() throws Exception {
+	 String input ="prog image[10,12] imageName <- \"imagefile\"; \n boolean ab=true;";
+//	 thrown.expect(SemanticException.class);
+	 typeCheck(input);
+	 }
+	 
+	 @Test
+	 public void testUndec6() throws Exception {
+	 String input ="prog image[10,12] imageName;"; 
+	 typeCheck(input);
+	 }
 
+	 @Test
+	 public void testUndec7() throws Exception {
+	 String input =  "p int image1;image1 = Z;"; 
+	 typeCheck(input);
+	 }
 }
