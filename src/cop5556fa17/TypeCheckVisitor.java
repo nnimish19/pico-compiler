@@ -385,13 +385,13 @@ public class TypeCheckVisitor implements ASTVisitor {
 	
 //---------------------------------------------------------------
 //	Expression_Binary ::= Expression0 op Expression1
-//	REQUIRE:  Expression0.Type == Expression1.Type  && Expression_Binary.Type ≠ $
+//	REQUIRE:  Expression0.Type == Expression1.Type  && Expression_Binary.Type != $
 //	Expression_Binary.type <=   
-//		 if op ∈ {EQ, NEQ} then BOOLEAN
-//		 else if (op ∈ {GE, GT, LT, LE} && Expression0.Type == INTEGER) then BOOLEAN
-//		 else if (op ∈ {AND, OR}) && (Expression0.Type == INTEGER || Expression0.Type ==BOOLEAN) 
+//		 if op = {EQ, NEQ} then BOOLEAN
+//		 else if (op = {GE, GT, LT, LE} && Expression0.Type == INTEGER) then BOOLEAN
+//		 else if (op = {AND, OR}) && (Expression0.Type == INTEGER || Expression0.Type ==BOOLEAN) 
 //			then Expression0.Type
-//		 else if op ∈ {DIV, MINUS, MOD, PLUS, POWER, TIMES} && Expression0.Type == INTEGER
+//		 else if op = {DIV, MINUS, MOD, PLUS, POWER, TIMES} && Expression0.Type == INTEGER
 //			then INTEGER
 //		else $
 	@Override
@@ -441,10 +441,10 @@ public class TypeCheckVisitor implements ASTVisitor {
 //	Expression_Unary ::= op Expression
 //			Expression_Unary.Type <=
 //				let t = Expression.Type in 
-//		            if op ∈ {EXCL} && (t == BOOLEAN || t == INTEGER) then t
+//		            if op = {EXCL} && (t == BOOLEAN || t == INTEGER) then t
 //		            else if op {PLUS, MINUS} && t == INTEGER then INTEGER
 //				    else $
-//		    REQUIRE:  Expression_ Unary.Type ≠ $   
+//		    REQUIRE:  Expression_ Unary.Type != $   
 	@Override
 	public Object visitExpression_Unary(Expression_Unary eu,	//expression_Unary
 			Object arg) throws Exception {
@@ -472,7 +472,7 @@ public class TypeCheckVisitor implements ASTVisitor {
 //	Expression_PixelSelector.Type <=  if name.Type == IMAGE then INTEGER 
 //                                    else if Index == null then name.Type
 //                                    else  $
-//              REQUIRE:  Expression_PixelSelector.Type ≠ $
+//              REQUIRE:  Expression_PixelSelector.Type != $
 	@Override
 	public Object visitExpression_PixelSelector(
 			Expression_PixelSelector eps, Object arg)	//expression_PixelSelector
