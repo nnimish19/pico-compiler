@@ -191,7 +191,7 @@ public class Parser {
 	public Source source() throws SyntaxException{	//First token must be one of the above or throw exception
 		Token first=t;
 		Source s=null;
-		if(t.isKind(STRING_LITERAL)){//Source_StringLiteral(Token firstToken, String fileOrUrl)
+		if(t.isKind(STRING_LITERAL)){//Source_StringLiteral(Token firstToken, String fileOrUrl)	//FILE or URL
 			s=new Source_StringLiteral(first, t.getText());	//check here getTEXT would return "cefva" including the double quotes
 			consume();
 		}

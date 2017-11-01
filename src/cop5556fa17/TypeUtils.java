@@ -22,6 +22,22 @@ public class TypeUtils {
 		case KW_image: {return Type.IMAGE;} 
 		case KW_url: {return Type.URL;} 
 		case KW_file: {return Type.FILE;}
+		case KW_SCREEN: {return Type.SCREEN;}
+			default :
+				break; 
+		}
+		assert false;  //should not reach here
+		return null;  
+	}
+	
+	public static Type getType(Scanner.Kind k){
+		switch (k){
+		case KW_int: {return Type.INTEGER;} 
+		case KW_boolean: {return Type.BOOLEAN;} 
+		case KW_image: {return Type.IMAGE;} 
+		case KW_url: {return Type.URL;} 
+		case KW_file: {return Type.FILE;}
+		case KW_SCREEN: {return Type.SCREEN;}
 			default :
 				break; 
 		}

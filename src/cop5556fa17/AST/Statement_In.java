@@ -7,7 +7,7 @@ public class Statement_In extends Statement {
 	public final String name;
 	public final Source source;
 	
-	Declaration dec;
+	Declaration dec;	//Also in LHS
 	
 
 	public Declaration getDec() {
