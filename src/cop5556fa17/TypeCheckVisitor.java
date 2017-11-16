@@ -210,23 +210,26 @@ public class TypeCheckVisitor implements ASTVisitor {
 
 //	Statement_In ::= name Source		//Variable stored:
 //		Statement_In.Declaration <= name.Declaration
-//		REQUIRE:  (name.Declaration != null) & (name.type == Source.type)
+//		REQUIRE:  (name.Declaration != null) & (name.type == Source.type)	
+//		UPDATE: Above requirement has been discarded.
 	@Override
 	public Object visitStatement_In(Statement_In si, Object arg)	//statement_In
 			throws Exception {
 		
 		Declaration dec = symTab.get(si.name);
 		
-		if(si.source==null)
-			throw new SemanticException(si.firstToken, "Error: visitStatement_In: Source not defined");
+		if(si.source!=null){
+//			throw new SemanticException(si.firstToken, "Error: visitStatement_In: Source not defined");
+			si.source.visit(this, arg);
+		}
+//		si.source.visit(this, arg);
 		
-		si.source.visit(this, arg);
-		if(dec!=null && dec.getType()==si.source.getType()){
-			si.setDec(dec);
-		}
-		else{
-			throw new SemanticException(si.firstToken, "Error: Either Variable is not declared or incompatible assignment");
-		}
+//		if(dec!=null && dec.getType()==si.source.getType()){
+		si.setDec(dec);	//dec can be null now
+//		}
+//		else{
+//			throw new SemanticException(si.firstToken, "Error: Either Variable is not declared or incompatible assignment");
+//		}
 		
 		return null;
 	}
