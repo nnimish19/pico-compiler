@@ -75,6 +75,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 	final boolean DEVEL;
 	final boolean GRADE;
 //
+//	http://asm.ow2.org/asm40/javadoc/user/org/objectweb/asm/MethodVisitor.html
 //    * @param opcode
 //    *            the opcode of the local variable instruction to be visited.
 //    *            This opcode is either ILOAD, LLOAD, FLOAD, DLOAD, ALOAD,
@@ -198,8 +199,8 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 	}
 
 
-//	For INTEGERS and BOOLEANS, the only “sink” is the screen, so generate code to print to the console here.
-//	Use java.io.PrintStream .println.  This is a virtual method, you can use the static field PrintStream “out” from class java.lang.System as the object.
+//	For INTEGERS and BOOLEANS, the only "sink" is the screen, so generate code to print to the console here.
+//	Use java.io.PrintStream .println.  This is a virtual method, you can use the static field PrintStream "out" from class java.lang.System as the object.
 	/** For Integers and booleans, the only "sink"is the screen, so generate code to print to console.
 	 * For Images, load the Image onto the stack and visit the Sink which will generate the code to handle the image.
 	 */
@@ -251,7 +252,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 //		mv.visitInsn(POP);
 		si.source.visit(this, arg);
 
-		if(si.getDec().getType()==Type.INTEGER){		//the variable already has a defined type. 
+		if(si.getDec().getType()==Type.INTEGER){		//the variable already has a defined type.
 			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "parseInt", "(Ljava/lang/String;)I", false);
 //			CodeGenUtils.genLogTOS(GRADE, mv, Type.INTEGER);	//PRINT VALUE just pushed on STACK
 			mv.visitFieldInsn(PUTSTATIC, className, si.name, "I");	//THIS WILL BE USED WHEN VARIABLE IS ACCESSED NEXT
@@ -261,7 +262,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 //			CodeGenUtils.genLogTOS(GRADE, mv, Type.BOOLEAN);	//PRINT VALUE just pushed on STACK
 			mv.visitFieldInsn(PUTSTATIC, className, si.name, "Z");
 		}
-		
+
 		return null;
 	}
 
@@ -478,7 +479,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 		if(eu.op==Kind.OP_EXCL)
 		{
 			if(eu.getType()==Type.BOOLEAN){
-				Label l1 = new Label(); 
+				Label l1 = new Label();
 				mv.visitJumpInsn(IFEQ, l1);
 				mv.visitInsn(ICONST_0);
 				Label l2 = new Label();
