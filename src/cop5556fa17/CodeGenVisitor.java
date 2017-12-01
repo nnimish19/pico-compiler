@@ -414,30 +414,14 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 		}
 		//	(eb.op == Kind.OP_AND || eb.op == Kind.OP_OR)
 		else if(eb.op == Kind.OP_AND){
-			eb.e0.visit(this, arg);
-			Label l1 = new Label();
-			mv.visitJumpInsn(IFEQ, l1);
+			eb.e0.visit(this,arg);
 			eb.e1.visit(this,arg);
-			mv.visitJumpInsn(IFEQ, l1);
-			mv.visitInsn(ICONST_1);
-			Label l2 = new Label();
-			mv.visitJumpInsn(GOTO, l2);
-			mv.visitLabel(l1);
-			mv.visitInsn(ICONST_0);
-			mv.visitLabel(l2);
+			mv.visitInsn(IAND);
 		}
 		else if(eb.op == Kind.OP_OR){
-			eb.e0.visit(this, arg);
-			Label l1 = new Label();
-			mv.visitJumpInsn(IFNE, l1);
+			eb.e0.visit(this,arg);
 			eb.e1.visit(this,arg);
-			mv.visitJumpInsn(IFNE, l1);
-			mv.visitInsn(ICONST_0);
-			Label l2 = new Label();
-			mv.visitJumpInsn(GOTO, l2);
-			mv.visitLabel(l1);
-			mv.visitInsn(ICONST_1);
-			mv.visitLabel(l2);
+			mv.visitInsn(IOR);
 		}
 		//CASE: PUSH INT RESULT ON STACK
 		else if(eb.op == Kind.OP_DIV ||eb.op == Kind.OP_MINUS || eb.op == Kind.OP_MOD ||eb.op == Kind.OP_PLUS ||eb.op == Kind.OP_POWER ||eb.op == Kind.OP_TIMES){
@@ -534,7 +518,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 
 		mv.visitLabel(if_true);
 
-		CodeGenUtils.genLogTOS(GRADE, mv, ec.trueExpression.getType());	//CHECK WHAT WILL COME HERE
+//		CodeGenUtils.genLogTOS(GRADE, mv, ec.trueExpression.getType());	//CHECK WHAT WILL COME HERE
 		return null;
 	}
 

@@ -90,6 +90,98 @@ public class CodeGenVisitorTest {
 		m.invoke(null, passedArgs);
 	}
 
+	   @Test
+	   public void Failed4() throws Exception {
+	      String prog = "prog8";
+	      String input = prog + "//args:true,false\nboolean b1;\nb1 <- @ 0;\nboolean b2;\nb2 <- @ 1;\n"
+	      		+ "boolean output = b1 & b2;"	//true false [false]
+	      		+ "\noutput -> SCREEN;"			//false
+	      		+ "boolean output2 = b1 | b2;"	//true false true
+	      		+ "\noutput2 -> SCREEN;";		//true
+	      show(input);
+	      byte[] bytecode = genCode(input);
+	      String[] commandLineArgs = {"true","false"};
+	      runCode(prog, bytecode, commandLineArgs);
+	      show("Log:\n"+RuntimeLog.globalLog);
+	      assertEquals("entering main;0;1;true;false;false;false;true;false;true;true;leaving main;",RuntimeLog.globalLog.toString());
+//	      assertEquals("entering main;11;10;20;20;10;true;11;10;false;11;20;true;true;leaving main;",RuntimeLog.globalLog.toString());
+//	      expected:
+//	      <...se;false;false;true;[false;]true;true;leaving ma...> but was:
+//	      <...se;false;false;true;[]true;true;leaving ma...
+//	      entering main;0;1;true;false;false;false;true;true;true;leaving main;
+	   }
+	   
+	   @Test
+	   public void Failed3() throws Exception {
+	      String prog = "prog18";
+	      String input = prog + "\nint j=11; int k=10; int g=20;\nboolean b=g>k ? j<k? true: j<g : 0==1;\n b->SCREEN;";
+	      show(input);
+	      byte[] bytecode = genCode(input);
+	      String[] commandLineArgs = {"true","false","true"};
+	      runCode(prog, bytecode, commandLineArgs);
+	      show("Log:\n"+RuntimeLog.globalLog);
+	      assertEquals("entering main;11;10;20;20;10;true;11;10;false;11;20;true;true;leaving main;",RuntimeLog.globalLog.toString());
+//	      expected:
+//	      <...lse;11;20;true;true;[]leaving main;> but was:
+//	      <...lse;11;20;true;true;[true;true;]leaving main;>
+	   }
+	   
+	   @Test
+	   public void Failed2() throws Exception {
+	      String prog = "prog12";
+	      String input = prog + "//args:true,false,true\nboolean b1;\nb1 <- @ 0;\nboolean b2;\nb2 <- @ 1;\nboolean b3;\nb3 <- @ 2;"
+//	    		  b1=true, b2=false, b3=true
+	      		+ "\nboolean output1 = (b1 & b2) | (b2 | b3) ;"	//(true, false, [false] | false, true [true])    >> true
+	      		+ "\nboolean output2 = (b1 | b2) | (b2 & b3) ;"// (true, -, [true] | -, - , -) >>true
+	      		+ "\nboolean output;\noutput = !(!(output1) | !(output2));"		//  ((true, [false] | true, [false]) [false]) >>true
+	      		+ "\noutput -> SCREEN;";	//true
+	      show(input);
+	      byte[] bytecode = genCode(input);
+	      String[] commandLineArgs = {"true","false","true"};
+	      runCode(prog, bytecode, commandLineArgs);
+	      show("Log:\n"+RuntimeLog.globalLog);
+	      assertEquals("entering main;0;1;2;"
+	      +"true;false;false;false;true;true;true;"
+	      +"true;false;true;false;true;false;true;"
+	      +"true;false;true;false;false;true;"
+	      +"true;leaving main;",RuntimeLog.globalLog.toString());
+	      
+//	      expected
+//	      entering main;0;1;2;
+//	      true;false;false;  false;true;true;  true;
+//	      true;[false];true;  false true false  true
+//	      true;false;true;false;false;true;
+//	      true;leaving main;
+	      
+//	      entering main;0;1;2;
+//	      true;false;false;  false;true;true;  true;
+//	      true;[true];true;
+//	      true;false;true;false;false;true;
+//	      true;leaving main;
+	      
+//	      
+//	      expected:
+//	      <...true;true;true;true;[false;true;false;true;fals]e;true;true;false;tr...> but was:
+//	      <...true;true;true;true;[true];true;true;false;tr...>
+//	      entering main;0;1;2;true;false;false;false;
+//	          true;true;true;true;true;true;true;false;true;false;false;true;true;leaving main;
+	      
+	   }
+
+	   @Test
+	   public void Failed1() throws Exception {
+	      String prog = "prog10";
+	      String input = prog + "//args:false,false\nboolean v1;\nv1 <- @ 0;\nboolean v2;\nv2 <- @ 1;\nboolean output = !v1 ? v1 : v2;\n";
+	      show(input);
+	      byte[] bytecode = genCode(input);
+	      String[] commandLineArgs = {"false","false"};
+	      runCode(prog, bytecode, commandLineArgs);
+	      show("Log:\n"+RuntimeLog.globalLog);
+	      assertEquals("entering main;0;1;false;true;false;leaving main;",RuntimeLog.globalLog.toString());
+//	      expected:<
+//	      ...;1;false;true;false;[]leaving main;> but was:<
+//	      ...;1;false;true;false;[false;]leaving main;>
+	   }
 
 	@Test
 	public void emptyProg() throws Exception {
@@ -182,7 +274,7 @@ public class CodeGenVisitorTest {
 		String[] commandLineArgs = {"true", "34", "56"}; //create command line argument array to initialize params, none in this case
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n"+RuntimeLog.globalLog);
-		assertEquals("entering main;0;true;1;34;2;56;true;34;34;34;leaving main;",RuntimeLog.globalLog.toString());
+		assertEquals("entering main;0;true;1;34;2;56;true;34;34;leaving main;",RuntimeLog.globalLog.toString());
 	}
 
 
@@ -237,7 +329,7 @@ public class CodeGenVisitorTest {
 		assertEquals("entering main;3;3;3;-3;-3;leaving main;",RuntimeLog.globalLog.toString());
 
 	}
-	
+
 	@Test
 	public void unaryExpr4() throws Exception {
 		String prog = "unaryExpr4";
@@ -301,7 +393,7 @@ public class CodeGenVisitorTest {
 	      String[] commandLineArgs = {"false", "34", "56"}; //create command line argument array to initialize params, none in this case
 	      runCode(prog, bytecode, commandLineArgs);
 	      show("Log:\n"+RuntimeLog.globalLog);
-	      assertEquals("entering main;0;false;1;34;2;56;false;56;56;56;leaving main;",RuntimeLog.globalLog.toString());
+	      assertEquals("entering main;0;false;1;34;2;56;false;56;56;leaving main;",RuntimeLog.globalLog.toString());
 	   }
 
 
@@ -691,5 +783,4 @@ public class CodeGenVisitorTest {
 	      assertEquals("entering main;true;true;true;false;false;leaving main;",RuntimeLog.globalLog.toString());
 
 	   }
-
 }
