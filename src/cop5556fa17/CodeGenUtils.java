@@ -5,7 +5,7 @@ import java.io.PrintStream;
 /**
  * This class contains several static methods useful when developing
  * the code generation part of our compiler.
- * 
+ *
  */
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -20,13 +20,13 @@ import org.objectweb.asm.util.TraceClassVisitor;
 import cop5556fa17.TypeUtils.Type;
 
 public class CodeGenUtils{
-	
+
 
 
 	/**
 	 * Converts the provided classfile
 	 * in a human readable format and returns as a String.
-	 * 
+	 *
 	 * @param bytecode
 	 */
 	public static String bytecodeToString(byte[] bytecode) {
@@ -37,11 +37,11 @@ public class CodeGenUtils{
 		cr.accept(new TraceClassVisitor(new PrintWriter(out)), flags);
 		return out.toString();
 	}
-	
+
 	/**
 	 * Prints the provided classfile, generally created by asm,
 	 * in a human readable format
-	 * 
+	 *
 	 * @param bytecode
 	 */
 	public static void dumpBytecode(byte[] bytecode) {
@@ -67,13 +67,13 @@ public class CodeGenUtils{
 		}
 	};
 
-	
+
 	/**
 	 * Creates an instance of the indicated class from the provided byteCode.
 	 * args is passed as a parameter to the constructor, and in order to
 	 * be the correct type for generated code, should be String[]
-	 * 	 
-	 * 
+	 *
+	 *
 	 * @param name
 	 * @param byteCode
 	 * @param args
@@ -93,13 +93,13 @@ public class CodeGenUtils{
 		Constructor<?> constructor = testClass.getConstructor(args.getClass());
 		return (Runnable) constructor.newInstance(args);
 	}
-	
+
 	/**
 	 * Generates code to print the given String followed by ; to the standard output.
 	 * IF !GEN, does not generate code.
 	 * Used to allow observation of execution of generated program
 	 * during development and grading.
-	 * 
+	 *
 	 * @param mv
 	 * @param message
 	 */
@@ -110,11 +110,11 @@ public class CodeGenUtils{
 		mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "print", "(Ljava/lang/String;)V", false);
 		}
 	}
-	
+
 	/**
 	 * Generates code to log the given String with a ; appended
 	 * IF !GEN, does not generate code.
-	 * 
+	 *
 	 * @param mv
 	 * @param message
 	 */
@@ -123,16 +123,16 @@ public class CodeGenUtils{
 		mv.visitLdcInsn(message + ";");
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, "cop5556fa17/RuntimeLog", "globalLogAddEntry", "(Ljava/lang/String;)V", false);
 		}
-	}	
+	}
 	/**
 	 * Generates code to print the value on top of the stack without consuming it.
 	 * If !GEN, does not generate code.
-	 * 
+	 *
 	 * GEN Requires stack is not empty, and type matches the given type.
-	 * 
+	 *
 	 * Currently implemented only for integer and boolean.
-	 * 
-	 * @param GEN   
+	 *
+	 * @param GEN
 	 * @param mv
 	 * @param type
 	 */
@@ -140,21 +140,27 @@ public class CodeGenUtils{
 		if (GEN) {
 			//duplicate top of stack
 			mv.visitInsn(Opcodes.DUP);
-			//convert to String
 			switch (type) {
 			case INTEGER: {
-				mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer","toString","(I)Ljava/lang/String;", false);				
+				//convert to String
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer","toString","(I)Ljava/lang/String;", false);
 			}
 				break;
 			case BOOLEAN: {
+				//convert to String
 				mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Boolean","toString","(Z)Ljava/lang/String;", false);
 			}
 				break;
-			//TODO other types if needed
+			case IMAGE: {
+				//write Image reference to image log, leaving stack in original state
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC, "cop5556fa17/RuntimeLog", "globalLogAddImage", "("+ImageSupport.ImageDesc + ")V", false);
+				return;
+			}
 			default: {
 				throw new RuntimeException("genLogTOS called unimplemented type " + type);
 			}
 			}
+			//if here, type was INTEGER or BOOLEAN
 			//add ; to end
 			mv.visitLdcInsn(";");
 			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "concat", "(Ljava/lang/String;)Ljava/lang/String;", false);
@@ -162,17 +168,18 @@ public class CodeGenUtils{
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, "cop5556fa17/RuntimeLog", "globalLogAddEntry", "(Ljava/lang/String;)V", false);
 
 		}
+
 	}
-	
+
 	/**
 	 * Generates code to print the value on top of the stack to the standard output without consuming it.
 	 * If !GEN, does not generate code.
-	 * 
+	 *
 	 * GEN Requires stack is not empty, and type matches the given type.
-	 * 
+	 *
 	 * Currently implemented only for integer and boolean.
-	 * 
-	 * @param GEN   
+	 *
+	 * @param GEN
 	 * @param mv
 	 * @param type
 	 */
@@ -198,7 +205,7 @@ public class CodeGenUtils{
 			//add ; to end
 			mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
 			mv.visitLdcInsn(";");
-			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "print", "(Ljava/lang/String;)V", false);		
+			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "print", "(Ljava/lang/String;)V", false);
 		}
 	}
 }
