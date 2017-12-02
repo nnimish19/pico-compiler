@@ -7,7 +7,7 @@ public class TypeUtils {
 	public static enum Type {
 		INTEGER("I"),
 		BOOLEAN("Z"),
-		IMAGE("Ljava/awt/image/BufferedImage;"),
+		IMAGE("java/awt/image/BufferedImage;"),	//Ljava.awt.image.BufferedImage
 		URL("Ljava/net/URL;"),
 		FILE("Ljava/io/File;"),
 		SCREEN("Screen"),
