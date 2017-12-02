@@ -120,7 +120,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 		Label mainStart = new Label();
 		mv.visitLabel(mainStart);
 		// if GRADE, generates code to add string to log
-		CodeGenUtils.genLog(GRADE, mv, "entering main");
+//		CodeGenUtils.genLog(GRADE, mv, "entering main");
 //		mv.visitLocalVariable("args", "[Ljava/lang/String;", null, mainStart, mainEnd, 0);
 
 		// visit decs and statements to add field to class
@@ -132,7 +132,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 		}
 
 		//generates code to add string to log
-		CodeGenUtils.genLog(GRADE, mv, "leaving main");
+//		CodeGenUtils.genLog(GRADE, mv, "leaving main");
 
 		//adds the required (by the JVM) return statement to main
 		mv.visitInsn(RETURN);
@@ -254,12 +254,12 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 
 		if(si.getDec().getType()==Type.INTEGER){		//the variable already has a defined type.
 			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "parseInt", "(Ljava/lang/String;)I", false);
-//			CodeGenUtils.genLogTOS(GRADE, mv, Type.INTEGER);	//PRINT VALUE just pushed on STACK
+//			CodeGenUtils.genLogTOS(GRADE, mv, Type.INTEGER);	//PRINT VALUE just pushed on STACK. NO LOGGING HERE IN ASSIGNMENT-5 
 			mv.visitFieldInsn(PUTSTATIC, className, si.name, "I");	//THIS WILL BE USED WHEN VARIABLE IS ACCESSED NEXT
 		}
 		else if(si.getDec().getType()==Type.BOOLEAN){
 			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "parseBoolean", "(Ljava/lang/String;)Z", false);
-//			CodeGenUtils.genLogTOS(GRADE, mv, Type.BOOLEAN);	//PRINT VALUE just pushed on STACK
+//			CodeGenUtils.genLogTOS(GRADE, mv, Type.BOOLEAN);	//PRINT VALUE just pushed on STACK. NO LOGGING HERE IN ASSIGNMENT-5 
 			mv.visitFieldInsn(PUTSTATIC, className, si.name, "Z");
 		}
 
@@ -447,7 +447,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 		}
 
 
-		CodeGenUtils.genLogTOS(GRADE, mv, eb.getType());
+//		CodeGenUtils.genLogTOS(GRADE, mv, eb.getType());
 		return null;
 	}
 
@@ -481,7 +481,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 			mv.visitInsn(INEG);
 		}
 
-		CodeGenUtils.genLogTOS(GRADE, mv, eu.e.getType());
+//		CodeGenUtils.genLogTOS(GRADE, mv, eu.e.getType());
 		return null;
 	}
 
@@ -518,7 +518,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 
 		mv.visitLabel(if_true);
 
-//		CodeGenUtils.genLogTOS(GRADE, mv, ec.trueExpression.getType());	//CHECK WHAT WILL COME HERE
+//  THIS WAS TO BE LOGGED IN ASSIGNMENT 5 ALSO//		CodeGenUtils.genLogTOS(GRADE, mv, ec.trueExpression.getType());	//CHECK WHAT WILL COME HERE
 		return null;
 	}
 
@@ -556,7 +556,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 			mv.visitInsn(ICONST_0);
 		}
 
-		CodeGenUtils.genLogTOS(GRADE, mv, Type.BOOLEAN);
+//		CodeGenUtils.genLogTOS(GRADE, mv, Type.BOOLEAN);
 		return null;
 	}
 //	Generate code to leave constant on stack
@@ -566,7 +566,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 //		throw new UnsupportedOperationException();
 		mv.visitLdcInsn(expression_IntLit.value);
 
-		CodeGenUtils.genLogTOS(GRADE, mv, Type.INTEGER);
+//		CodeGenUtils.genLogTOS(GRADE, mv, Type.INTEGER);
 		return null;
 	}
 //	Generate code to get the value of the variable and leave it on top of the stack.
@@ -586,7 +586,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 //			mv.visitFieldInsn(GETFIELD, className, varName, varType);
 //		}
 //
-		CodeGenUtils.genLogTOS(GRADE, mv, ei.getType());
+//		CodeGenUtils.genLogTOS(GRADE, mv, ei.getType());
 		return null;
 	}
 
