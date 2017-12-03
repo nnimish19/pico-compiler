@@ -258,7 +258,7 @@ public class Parser {
 			consume();
 			match(COMMA);
 			e2= new Expression_PredefinedName(t, t.kind);
-			match(KW_A);
+			match(KW_a);
 			ind= new Index(tmp, e1,e2);
 		}
 		else{
