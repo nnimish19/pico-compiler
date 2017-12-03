@@ -1,5 +1,8 @@
 package cop5556fa17;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 
 import org.objectweb.asm.ClassWriter;
@@ -41,6 +44,8 @@ import cop5556fa17.AST.Statement_Out;
 import cop5556fa17.AST.Statement_Assign;
 //import cop5556fa17.image.ImageFrame;
 //import cop5556fa17.image.ImageSupport;
+import cop5556fa17.ImageFrame;
+import cop5556fa17.ImageSupport;
 
 public class CodeGenVisitor implements ASTVisitor, Opcodes {
 
@@ -125,6 +130,23 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 
 		// visit decs and statements to add field to class
 		//  and instructions to main method, respectivley
+		mv.visitInsn(ICONST_0);
+		mv.visitVarInsn(ISTORE, 1);
+		mv.visitInsn(ICONST_0);
+		mv.visitVarInsn(ISTORE, 2);
+		mv.visitInsn(ICONST_0);
+		mv.visitVarInsn(ISTORE, 3);
+		mv.visitInsn(ICONST_0);
+		mv.visitVarInsn(ISTORE, 4);
+		mv.visitInsn(ICONST_0);
+		mv.visitVarInsn(ISTORE, 5);
+		mv.visitInsn(ICONST_0);
+		mv.visitVarInsn(ISTORE, 6);
+		mv.visitInsn(ICONST_0);
+		mv.visitVarInsn(ISTORE, 7);
+		mv.visitInsn(ICONST_0);
+		mv.visitVarInsn(ISTORE, 8);
+		
 		ArrayList<ASTNode> decsAndStatements = program.decsAndStatements;
 		for (ASTNode node : decsAndStatements) {
 //			System.out.println("------------new node--------------");
@@ -143,6 +165,17 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 
 		//handles parameters and local variables of main. Right now, only args
 		mv.visitLocalVariable("args", "[Ljava/lang/String;", null, mainStart, mainEnd, 0);
+		mv.visitLocalVariable("x", "I", null, mainStart, mainEnd, 1);
+		mv.visitLocalVariable("y", "I", null, mainStart, mainEnd, 2);
+		mv.visitLocalVariable("X", "I", null, mainStart, mainEnd, 3);
+		mv.visitLocalVariable("Y", "I", null, mainStart, mainEnd, 4);
+		mv.visitLocalVariable("r", "I", null, mainStart, mainEnd, 5);
+		mv.visitLocalVariable("a", "I", null, mainStart, mainEnd, 6);
+		mv.visitLocalVariable("R", "I", null, mainStart, mainEnd, 7);
+		mv.visitLocalVariable("A", "I", null, mainStart, mainEnd, 8);
+		mv.visitLocalVariable("Z", "I", null, mainStart, mainEnd, 9);
+		mv.visitLocalVariable("tmp", "I", null, mainStart, mainEnd, 10);
+		mv.visitLocalVariable("tmps", "Ljava/lang/String;", null, mainStart, mainEnd, 11);
 
 		//Sets max stack size and number of local vars.
 		//Because we use ClassWriter.COMPUTE_FRAMES as a parameter in the constructor,
@@ -185,17 +218,128 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 		return null;
 	}
 
+//	1.Add a field to the class with type java.awt.image.BufferedImage.  
+//	2.If there is a source, visit the AST node to load the String containing the URL of file name onto the stack.  
+//	3.Use the cop5556fa17.ImageSupport.readImage method to read the image.	
+		//public static BufferedImage readImage(String source, Integer X, Integer Y) {
+		//return type is BufferedImage = java.awt.image
+//	4.If no index is given pass null for the xSize and ySize (called X and Y elsewhere)  parameters, 
+//	otherwise visit the index to leave the values on top of the stack.  
+//	These are ints, use java.lang.Integer.valueOf to convert to Integer.
+	
+//	If no source is given use the makeImage method to create an image.  
+//	If no size is given use values of the predefined constants def_X and def_Y.
+//	Store the image reference in the field.****
+	
+//	public final Expression xSize;
+//	public final Expression ySize;
+//	public final String name;
+//	public final Source source;
+//	"\nimage[512,512] g; \n"
+//	"\nimage g; \n"
+
+	public static final String ImageClassName = "java/awt/image/BufferedImage";
+	public static final String ImageDesc = "Ljava/awt/image/BufferedImage;";//TypeUtils.java
 	@Override
-	public Object visitDeclaration_Image(Declaration_Image declaration_Image, Object arg) throws Exception {
+	public Object visitDeclaration_Image(Declaration_Image di, Object arg) throws Exception {	//declaration_Image
 		// TODO HW6
-		throw new UnsupportedOperationException();
+//		throw new UnsupportedOperationException();
+		cw.visitField(ACC_STATIC, di.name, di.getType().toString(), null, null).visitEnd();	//di.getType().toString() = imageType
+
+		//Both xsize and ysize if present are integers. note we have already computed their types. 
+		//TypeCheckVisitor: if(di.xSize.getType()!=Type.INTEGER || di.ySize.getType()!=Type.INTEGER){ throw error
+		if(di.xSize!=null && di.ySize!=null) {
+			di.xSize.visit(this, arg);	//put on stack	//store this in image property? This is automaticaly handled by makeImage
+			mv.visitVarInsn(ISTORE, 3);	//put in X
+			di.ySize.visit(this, arg);	//put on stack
+			mv.visitVarInsn(ISTORE, 4);	//put in Y
+			mv.visitVarInsn(ILOAD, 3);
+			mv.visitVarInsn(ILOAD, 4);
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "makeImage", "(II)Ljava/awt/image/BufferedImage;", false);
+			mv.visitFieldInsn(PUTSTATIC, className, di.name, di.getType().toString());		//CHECK:"Ljava/awt/image/BufferedImage;" 
+		}
+		else if(di.xSize==null) {
+			mv.visitLdcInsn(256);	//def_X = 256 default
+			mv.visitVarInsn(ISTORE, 3);	//put in X
+			mv.visitLdcInsn(256);	//def_Y = 256 default
+			mv.visitVarInsn(ISTORE, 4);	//put in Y
+			mv.visitVarInsn(ILOAD, 3);
+			mv.visitVarInsn(ILOAD, 4);
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "makeImage", "(II)Ljava/awt/image/BufferedImage;", false);
+			mv.visitFieldInsn(PUTSTATIC, className, di.name, di.getType().toString());		//CHECK:"Ljava/awt/image/BufferedImage;"
+		}
+		
+		if(di.source!=null){
+			di.source.visit(this, arg);	//place string containing URL on top of stack
+
+//			TODO
+			if(di.xSize==null) {	//load original image.
+				mv.visitInsn(ACONST_NULL);
+				mv.visitInsn(ACONST_NULL);
+//				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "readFromFile", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;", false);
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "readImage", "(Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;)Ljava/awt/image/BufferedImage;", false);
+				mv.visitFieldInsn(PUTSTATIC, className, di.name, "Ljava/awt/image/BufferedImage;");	
+			}
+			else {
+//				BufferedImage refImage0 = ImageSupport.readImage(imageFile1, 128, 128);
+//				string is already on top of stack. now push the size X, Y.
+				mv.visitFieldInsn(GETSTATIC, className, di.name, "Ljava/awt/image/BufferedImage;");
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "getX", "(Ljava/awt/image/BufferedImage;)I", false);
+				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+				
+				mv.visitFieldInsn(GETSTATIC, className, di.name, "Ljava/awt/image/BufferedImage;");
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "getY", "(Ljava/awt/image/BufferedImage;)I", false);
+				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+//				NOTE: We have converted the "I" type to "Ljava/lang/Integer;" before calling!!
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "readImage", "(Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;)Ljava/awt/image/BufferedImage;", false);
+				mv.visitFieldInsn(PUTSTATIC, className, di.name, "Ljava/awt/image/BufferedImage;");
+			}
+		}		
+		
+		return null;
 	}
 
-	@Override
-	public Object visitDeclaration_SourceSink(Declaration_SourceSink declaration_SourceSink, Object arg)
+//	Add a field to the class with the given name.  
+//	If there is a Source, visit it to generate code to leave a String describing the sport on top of the stack and 
+//	then write it to the field.
+	
+//	public final String name;
+//	public final Source source;
+//	KW_url url1 = "http://"		Type: url
+//	KW_file file1 = "Users/nj/,,"	Type: file
+	@Override		//write it to the field.  
+	public Object visitDeclaration_SourceSink(Declaration_SourceSink ds, Object arg)	//declaration_SourceSink
 			throws Exception {
 		// TODO HW6
-		throw new UnsupportedOperationException();
+//		throw new UnsupportedOperationException();
+		cw.visitField(ACC_STATIC, ds.name, ds.getType().toString(), null, null).visitEnd();	//ds.getType().toString() = ImageDesc
+		if(ds.source!=null){
+			ds.source.visit(this, arg);	//place value on top of stack: Ljava/lang/String;
+			mv.visitFieldInsn(PUTSTATIC, className, ds.name, ds.getType().toString());
+//			mv.visitVarInsn(ASTORE, 11);
+//			if(ds.getType()==Type.URL) {		//https://stackoverflow.com/questions/15842239/how-to-cast-a-string-to-an-url-in-java
+////				URL file = new URL(imageFile1);
+//				mv.visitTypeInsn(NEW, "java/net/URL");
+//				mv.visitInsn(DUP);
+////				mv.visitLdcInsn("/Users/nj/UFL/plp/eclipse_workspace/PLPHomework/src/cop5556fa17/ShelterPoint.jpg");
+//				mv.visitVarInsn(ALOAD, 11);
+//				mv.visitMethodInsn(INVOKESPECIAL, "java/net/URL", "<init>", "(Ljava/lang/String;)V", false);
+////				mv.visitVarInsn(ASTORE, 5);
+//				mv.visitFieldInsn(PUTSTATIC, className, ds.name, ds.getType().toString());
+//			}else {		//https://stackoverflow.com/questions/11583364/convert-string-to-file-in-java
+////				File file = new File(imageFile1);
+//				mv.visitTypeInsn(NEW, "java/io/File");
+//				mv.visitInsn(DUP);
+////				mv.visitLdcInsn("/Users/nj/UFL/plp/eclipse_workspace/PLPHomework/src/cop5556fa17/ShelterPoint.jpg");
+//				mv.visitVarInsn(ALOAD, 11);
+//				mv.visitMethodInsn(INVOKESPECIAL, "java/io/File", "<init>", "(Ljava/lang/String;)V", false);
+//				mv.visitFieldInsn(PUTSTATIC, className, ds.name, ds.getType().toString());
+//			}
+		}
+		
+//		mv.visitFieldInsn(PUTSTATIC, className, ds.name, ds.getType().toString());	//TODO: what type? ImageDesc? ds.getType().toString()
+		
+		return null;
 	}
 
 
@@ -212,12 +356,16 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 
 		mv.visitFieldInsn(GETSTATIC, className, so.name, so.getDec().getType().toString());	//LEAVING A VALUE ON TOP OF STACK;
 		CodeGenUtils.genLogTOS(GRADE, mv, so.getDec().getType());	//PRINT VALUE just pushed on STACK
-		if(so.sink.getType()==Type.SCREEN){
+//		if(so.sink.getType()==Type.SCREEN){
+		if(so.getDec().getType()==Type.INTEGER || so.getDec().getType()==Type.BOOLEAN){
 			CodeGenUtils.genPrintTOS(GRADE, mv, so.getDec().getType());	//NOTE THIS IS PRINT TOS
 			mv.visitInsn(POP);	//REMOVE VALUE ON STACK
+		}else {
+			so.sink.visit(this, arg);
 		}
 
-//		so.sink.visit(this, arg);
+//		TODO: if SINK = SCREEN handled.   //true for int, bool, image 
+//		if SINK = file:  true only for source = image: check parser.java and typeCheckVisitor.java 
 
 
 		return null;
@@ -262,6 +410,32 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 //			CodeGenUtils.genLogTOS(GRADE, mv, Type.BOOLEAN);	//PRINT VALUE just pushed on STACK. NO LOGGING HERE IN ASSIGNMENT-5 
 			mv.visitFieldInsn(PUTSTATIC, className, si.name, "Z");
 		}
+		else {	//image
+//			if(si.getDec().xsize)
+			Declaration_Image dec = (Declaration_Image) si.getDec();
+			if(dec.xSize==null) {	//load original image.
+				mv.visitInsn(ACONST_NULL);
+				mv.visitInsn(ACONST_NULL);
+//				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "readFromFile", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;", false);
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "readImage", "(Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;)Ljava/awt/image/BufferedImage;", false);
+				mv.visitFieldInsn(PUTSTATIC, className, si.name, "Ljava/awt/image/BufferedImage;");	
+			}
+			else {
+//				BufferedImage refImage0 = ImageSupport.readImage(imageFile1, 128, 128);
+//				string is already on top of stack. now push the size X, Y.
+				mv.visitFieldInsn(GETSTATIC, className, si.name, "Ljava/awt/image/BufferedImage;");
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "getX", "(Ljava/awt/image/BufferedImage;)I", false);
+				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+				
+				mv.visitFieldInsn(GETSTATIC, className, si.name, "Ljava/awt/image/BufferedImage;");
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "getY", "(Ljava/awt/image/BufferedImage;)I", false);
+				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+//				NOTE: We have converted the "I" type to "Ljava/lang/Integer;" before calling!!
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "readImage", "(Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;)Ljava/awt/image/BufferedImage;", false);
+				mv.visitFieldInsn(PUTSTATIC, className, si.name, "Ljava/awt/image/BufferedImage;");
+			}
+			
+		}
 
 		return null;
 	}
@@ -273,21 +447,117 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 //	REQUIRE:  LHS.Type == Expression.Type
 //	StatementAssign.isCartesian <= LHS.isCartesian
 
+//	1.If the type is Image, generate code to loop over the pixels of the image.  
+//	2.For each pixel, visit the expression to generate code to leave its value on top of the stack and visit LHS to 
+//	generate code to store the value in the image.   
+//	3.The range of x is [0, X) and y is [0, Y) where X and Y can be obtained from the image object using methods 
+//	ImageSupport.getX and imageSupport.getY.   
+//	4.Note that x, y, X, and Y are all predefined variables that need to be added to the class.  
+//	5.See comments below.   (Hint:  write a little Java program to see how to implement the loops).  
+
+//	To handle polar coordinates, you still loop over x and y,  but calculate r and a using RuntimeFunctions.polar_r and RuntimeFunctions.polar_a.
+
 	@Override
 	public Object visitStatement_Assign(Statement_Assign sa, Object arg) throws Exception {	//statement_Assign
 		//TODO  (see comment)
 //		throw new UnsupportedOperationException();
-		sa.e.visit(this, arg);
-		sa.lhs.visit(this, arg);
+		if(ImageDesc.equals(sa.lhs.getType().toString())){
+			//place X and Y on stack		//mv.visitMethodInsn(INVOKEVIRTUAL, "java/awt/image/BufferedImage", "getWidth", "()I", false);
+//			mv.visitMethodInsn(INVOKEVIRTUAL, cop5556fa17.imageSupport, "getX", "(java/awt/image/BufferedImage)I", false);
+//			image[512,512] g;		//declaration
+//			g[[x,y]] = 16711680;		//assignment: g[[x,y]] comes from LHS and 16711680 comes from e.  
+			
+//			Declaration_Image dec = (Declaration_Image)sa.lhs.getDec();
+//			int X,Y;
+//			if(dec.xSize!=null) {
+//				Expression_IntLit Xsize = (Expression_IntLit)dec.xSize;
+//				Expression_IntLit Ysize = (Expression_IntLit)dec.ySize;
+//				X=Xsize.value;
+//				Y=Ysize.value;
+//			}else {
+//				X=256;	//default image size is orignal image size so this is wrong!
+//				Y=256;
+//			}
+			
+			//					 int X=512,Y=512;		//This are set during declaration
+			//					 image = ImageSupport.makeImage(X,Y);
+			//					 int val = 16777215;		this is expression value		//mv.visitLdcInsn(new Integer(16777215));
+			//					 int x,y;				
+			//					 for(y=0; y < Y; ++y) {
+			//						 for (x = 0; x < X; ++x ) {
+			//							 ImageSupport.setPixel(val, image, x, y);
+			//						 }
+			//					 }
+			
+			mv.visitFieldInsn(GETSTATIC, className, sa.lhs.name, "Ljava/awt/image/BufferedImage;");
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "getX", "(Ljava/awt/image/BufferedImage;)I", false);
+			mv.visitVarInsn(ISTORE, 3);	//X
+			
+			mv.visitFieldInsn(GETSTATIC, className, sa.lhs.name, "Ljava/awt/image/BufferedImage;");
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "getY", "(Ljava/awt/image/BufferedImage;)I", false);		
+			mv.visitVarInsn(ISTORE, 4);	//Y
+			
+//					x,y,X,Y	>1,2,3,4
+			mv.visitInsn(ICONST_0);
+			mv.visitVarInsn(ISTORE, 2);	//y-for loop
+			Label l6 = new Label();
+			mv.visitJumpInsn(GOTO, l6);
+			
+			Label l7 = new Label();
+			mv.visitLabel(l7);
+			mv.visitInsn(ICONST_0);
+			mv.visitVarInsn(ISTORE, 1);	//x-for loop
+			Label l9 = new Label();
+			mv.visitJumpInsn(GOTO, l9);
+			Label l10 = new Label();
+			mv.visitLabel(l10);
+			
+			//call expression: //			mv.visitVarInsn(ILOAD, 10);	//tmp stores value
+				//			mv.visitVarInsn(ILOAD, 1);	//x
+				//			mv.visitVarInsn(ILOAD, 2);	//y
+				//			mv.visitInsn(IMUL);
+			sa.e.visit(this, arg);
+			sa.lhs.visit(this, arg);
+			
+			mv.visitIincInsn(1, 1);		//inc x by 1
+			mv.visitLabel(l9);	//inner for loop condition---------------
+			mv.visitVarInsn(ILOAD, 1);	//x
+			mv.visitVarInsn(ILOAD, 3);	//X		//these are related to the image; and not tempVariable stored on stack
+			mv.visitJumpInsn(IF_ICMPLT, l10); //inner for loop---------------
 
+			mv.visitIincInsn(2, 1);		//inc y by 1
+			mv.visitLabel(l6);	//outer for loop condition---------------
+			mv.visitVarInsn(ILOAD, 2);	//y
+			mv.visitVarInsn(ILOAD, 4);	//Y		//these are related to the image; and not tempVariable stored on stack
+			mv.visitJumpInsn(IF_ICMPLT, l7); //outer for loop---------------
+			
+			
+		}else{	//INT or BOOLEAN
+			sa.e.visit(this, arg);
+			sa.lhs.visit(this, arg);
+		}
+		
 		return null;
 	}
 
-	// generate code to leave the two values on the stack
+//	Visit the expressions to leave the values on top of the stack.  If isCartesian, you are done.  
+//	If not, generate code to convert r and a to x and y using (cart_x and cart_y).  Hint:  you will need to manipulate the stack a little bit to handle the two values.   You may find  DUP2, DUP_X2, and POP useful.  
 	@Override
 	public Object visitIndex(Index index, Object arg) throws Exception {
 		// TODO HW6
-		throw new UnsupportedOperationException();
+//		throw new UnsupportedOperationException();
+		if(index.isCartesian()) {
+			index.e0.visit(this, arg);
+			index.e1.visit(this, arg);
+		}else {
+			index.e0.visit(this, arg);
+			index.e1.visit(this, arg);
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "cart_x", "(II)I", false);
+			index.e0.visit(this, arg);
+			index.e1.visit(this, arg);
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "cart_y", "(II)I", false);
+		}
+		return null;
 	}
 
 
@@ -298,29 +568,58 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 //    store the value on top of the stack in variable name.
 //TODO Assignment 6:  handle case where LHS.Type is IMAGE
 	@Override
-	public Object visitLHS(LHS lhs, Object arg) throws Exception {
+	public Object visitLHS(LHS lhs, Object arg) throws Exception {	//lhs has String name, Index index
 		//TODO  (see comment)
 //		throw new UnsupportedOperationException();
 
-		mv.visitFieldInsn(PUTSTATIC, className, lhs.name, lhs.getType().toString());
+		if(lhs.getType() == Type.INTEGER || lhs.getType() == Type.BOOLEAN){		//simply put the value in variable.
+			mv.visitFieldInsn(PUTSTATIC, className, lhs.name, lhs.getType().toString());
+		}
+		else {	//image:set each and every pixel of [x,y] or [r,a]		//check if it is predefined variables : x,y only then iterate  
+			if(lhs.index!=null) {
+				try {
+					Expression_PredefinedName exp0= (Expression_PredefinedName)lhs.index.e0;
+					Expression_PredefinedName exp1= (Expression_PredefinedName)lhs.index.e1;
+					if(exp0.kind==Kind.KW_r && exp1.kind==Kind.KW_a) {		//handle the radian case. iterate over all
+						mv.visitFieldInsn(GETSTATIC, className, lhs.name, "Ljava/awt/image/BufferedImage;");
+						mv.visitVarInsn(ILOAD, 1);	//x
+						mv.visitVarInsn(ILOAD, 2);	//y
+//						lhs.index.visit(this, arg);
+						mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "setPixel", "(ILjava/awt/image/BufferedImage;II)V", false);
+					}
+					else if(exp0.kind==Kind.KW_x && exp1.kind==Kind.KW_y) {
+//						****Note currently we have value of expression(PIXEL) on top of stack. lets store it in temporary variable
+						mv.visitFieldInsn(GETSTATIC, className, lhs.name, "Ljava/awt/image/BufferedImage;");
+						mv.visitVarInsn(ILOAD, 1);	//x
+						mv.visitVarInsn(ILOAD, 2);	//y
+//						lhs.index.visit(this, arg);
+						mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "setPixel", "(ILjava/awt/image/BufferedImage;II)V", false);
+					}
+				}catch(Exception e) {
+					//it means index values are integers. Set pixel value at those locations only.
+//					g[12,13] = 65280;	//you don't need to iterate anything.
+					mv.visitFieldInsn(GETSTATIC, className, lhs.name, "Ljava/awt/image/BufferedImage;");
+					lhs.index.visit(this, arg);
+					mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "setPixel", "(ILjava/awt/image/BufferedImage;II)V", false);
+				}	
+			}
+		}
 
-//		if(lhs.getType() == Type.INTEGER){
-//			mv.visitFieldInsn(PUTSTATIC, className, lhs.name, lhs.getType().toString());		//"I"
-//			mv.visitFieldInsn(GETFIELD, className, lhs.name, lhs.getType().toString());		//	WHY LEAVE VARIABLE ON STACK?
-//		}
-//		else if(lhs.getType() == Type.BOOLEAN){
-//			mv.visitFieldInsn(PUTSTATIC, className, lhs.name, lhs.getType().toString());		//"Z"
-//			mv.visitFieldInsn(GETFIELD, className, lhs.name, lhs.getType().toString());		//"Z"
-//		}
-
+		
 		return null;
 	}
 
 
+//	Generate code to display the image (whose ref should be on top of the stack already) on the screen.  
+//	Call ImageFrame.makeFrame.  Note that this method returns a reference to the frame which is not needed, 
+//	so pop it off the stack.
 	@Override
 	public Object visitSink_SCREEN(Sink_SCREEN sc, Object arg) throws Exception {	//sink_SCREEN
 		//TODO HW6
-		throw new UnsupportedOperationException();
+//		throw new UnsupportedOperationException();
+		mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageFrame", "makeFrame", "(Ljava/awt/image/BufferedImage;)Ljavax/swing/JFrame;", false);
+		mv.visitInsn(POP);
+		return null;
 
 //		mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
 //		mv.visitFieldInsn(GETSTATIC, className, so.name, so.getDec().getType().toString());
@@ -332,23 +631,38 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 
 //		return null;
 	}
+	
+//	The identifier should contain a reference to a String representing a filename.  
+//	Generate code to write the image to the file.  The image reference should already be on the stack, 
+//	so load the filename and invoke ImageSupport.write.
 	@Override
-	public Object visitSink_Ident(Sink_Ident sink_Ident, Object arg) throws Exception {
-		//TODO HW6
-		throw new UnsupportedOperationException();
+	public Object visitSink_Ident(Sink_Ident si, Object arg) throws Exception {	//sink_Ident
+//		TODO HW6
+//		throw new UnsupportedOperationException();
+//		mv.visitFieldInsn(GETSTATIC, "cop5556fa17/MyTest", "image", "Ljava/awt/image/BufferedImage;");
+//		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETSTATIC, className, si.name, si.getType().toString());	
+		//TYPE URL and FILE both: si.getType().toString(): STRING: See TypeUtils and visitDeclaration_SourceSink
+		mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "write", "(Ljava/awt/image/BufferedImage;Ljava/lang/String;)V", false);
+		return null;
 	}
 
-
+//	Load the String(fileOrURL) onto the stack
+//	Check: Parser.java or TypeCheckVisitor.java
 	@Override
-	public Object visitSource_StringLiteral(Source_StringLiteral source_StringLiteral, Object arg) throws Exception {
+	public Object visitSource_StringLiteral(Source_StringLiteral ssl, Object arg) throws Exception {	//source_StringLiteral
 		// TODO HW6
-		throw new UnsupportedOperationException();
+//		throw new UnsupportedOperationException();
+//		mv.visitFieldInsn(GETFIELD, className, ssl.fileOrUrl, ssl.getType().toString());
+//		mv.visitFieldInsn(GETSTATIC, className, varName, varType);
+		mv.visitLdcInsn(new String(ssl.fileOrUrl));
+		return null;
 	}
+	
 //	Generate code to evaluate the expression and use aaload to read the element from the command line array using the expression value as the index.
 //	The command line array is the String[] args param passed to main.
 //	"g <- @ 0;\n"
 //	"h <- @ 1;\n"
-
 	@Override
 	public Object visitSource_CommandLineParam(Source_CommandLineParam scp, Object arg)	//	source_CommandLineParam
 			throws Exception {
@@ -357,16 +671,22 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 //		https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-6.html#jvms-6.5.aaload
 //		http://homepages.inf.ed.ac.uk/kwxm/JVM/aaload.html
 //		mv.visitFieldInsn(GETFIELD, className, "args", "[Ljava/lang/String;");
-		mv.visitVarInsn(ALOAD,0);
+		mv.visitVarInsn(ALOAD,0);	//object load 0
 		scp.paramNum.visit(this, arg);	//it must be INTEGER checked in Symantic analysis: that specifies index of argument of String args[]
 		mv.visitInsn(AALOAD);
 //		CodeGenUtils.genLogTOS(GRADE, mv, scp.getType());
 		return null;
 	}
+
+	//	This identifier refers to a String.  Load it onto the stack.|| it is either FILE or URL: load that string onto stack!!
 	@Override
 	public Object visitSource_Ident(Source_Ident source_Ident, Object arg) throws Exception {
 		// TODO HW6
-		throw new UnsupportedOperationException();
+//		throw new UnsupportedOperationException();
+		//this variable must have been declared previously. load its value in top of stack
+		mv.visitFieldInsn(GETSTATIC, className, source_Ident.name, "Ljava/lang/String;");
+//		mv.visitLdcInsn(new String(source_Ident.name));		//name = file_name: 
+		return null;
 	}
 //	--------------------------------------------------------------------------------------------------------------------------
 //	For each expression kind, generate code to leave the value of the expression on top of the stack.
@@ -437,6 +757,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 					break;
 				case OP_TIMES:
 					mv.visitInsn(IMUL);
+//					mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
 					break;
 				case OP_DIV:
 					mv.visitInsn(IDIV);
@@ -486,12 +807,18 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 	}
 
 
-
+//	Generate code to load the image reference on the stack.  
+//	Visit the index to generate code to leave Cartesian location of index on the stack.  
+//	Then  invoke ImageSupport.getPixel which generates code to leave the value of the pixel on the stack.
 	@Override
-	public Object visitExpression_PixelSelector(Expression_PixelSelector expression_PixelSelector, Object arg)
+	public Object visitExpression_PixelSelector(Expression_PixelSelector eps, Object arg)	//expression_PixelSelector
 			throws Exception {
 		// TODO HW6
-		throw new UnsupportedOperationException();
+//		throw new UnsupportedOperationException();
+		mv.visitFieldInsn(GETSTATIC, className, eps.name, "Ljava/awt/image/BufferedImage;");
+		eps.index.visit(this, arg);
+		mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/ImageSupport", "getPixel", "(Ljava/awt/image/BufferedImage;II)I", false);
+		return null;
 	}
 
 //	Generate code to evaluate the Expressioncondition and depending on its
@@ -522,25 +849,126 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 		return null;
 	}
 
+//	Visit the expression to generate code to leave its value on top of the stack.  
+//	Then invoke the corresponding function in RuntimeFunctions.  The functions that belong here are abs and log.
+//	(You do not need to implement sin, cos, or atan)
 	@Override
 	public Object visitExpression_FunctionAppWithExprArg(
-			Expression_FunctionAppWithExprArg expression_FunctionAppWithExprArg, Object arg) throws Exception {
+			Expression_FunctionAppWithExprArg ef, Object arg) throws Exception {	//expression_FunctionAppWithExprArg
 		// TODO HW6
-		throw new UnsupportedOperationException();
+//		throw new UnsupportedOperationException();
+		ef.arg.visit(this, arg);
+		if(ef.function==Kind.KW_abs) {
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "abs", "(I)I", false);
+		}
+		else if(ef.function==Kind.KW_log) {
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "log", "(I)I", false);
+		}
+		
+		return null;
 	}
 
+//	Visit the expressions belonging to the index.  
+//	Then invoke the corresponding function in RuntimeFunctions.  
+//	The functions that belong here are cart_x, cart_y, polar_r, and polar_a.  
+//	These functions convert between the cartesian (x,y) and polar (r,a) 
+//	(i.e. radius and angle in degrees) representations of the location in the image.
 	@Override
 	public Object visitExpression_FunctionAppWithIndexArg(
-			Expression_FunctionAppWithIndexArg expression_FunctionAppWithIndexArg, Object arg) throws Exception {
+			Expression_FunctionAppWithIndexArg ef, Object arg) throws Exception {	//expression_FunctionAppWithIndexArg
 		// TODO HW6
-		throw new UnsupportedOperationException();
+//		throw new UnsupportedOperationException();
+		if(ef.arg!=null) {
+			ef.arg.e0.visit(this, arg);
+			ef.arg.e1.visit(this, arg);
+			
+			if(ef.function==Kind.KW_cart_x) {
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "cart_x", "(II)I", false);
+			}
+			else if(ef.function==Kind.KW_cart_y) {
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "cart_y", "(II)I", false);
+			}
+			else if(ef.function==Kind.KW_polar_r) {
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "polar_r", "(II)I", false);
+			}
+			else if(ef.function==Kind.KW_polar_a) {
+				mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "polar_a", "(II)I", false);
+			}
+		}
+		return null;
 	}
 
 	@Override
-	public Object visitExpression_PredefinedName(Expression_PredefinedName expression_PredefinedName, Object arg)
+	public Object visitExpression_PredefinedName(Expression_PredefinedName epn, Object arg)	//expression_PredefinedName
 			throws Exception {
 		// TODO HW6
-		throw new UnsupportedOperationException();
+//		throw new UnsupportedOperationException();
+//		x, y, X,Y, r,a, R,A, DEF_X, DEF_Y, Z
+		int slot_no = 1;
+		if(epn.kind==Kind.KW_x) {		//need to initialise them at the start of program
+//			mv.visitInsn(ICONST_0);
+//			mv.visitVarInsn(ISTORE, 1);
+			mv.visitVarInsn(ILOAD, 1);
+//			mv.visitInsn(ICONST_0);
+//			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+		}
+		else if(epn.kind==Kind.KW_y){
+			mv.visitVarInsn(ILOAD, 2);
+//			mv.visitInsn(ICONST_0);
+//			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+		}
+		else if(epn.kind==Kind.KW_X){
+			mv.visitVarInsn(ILOAD, 3);
+//			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+		}
+		else if(epn.kind==Kind.KW_Y){
+			mv.visitVarInsn(ILOAD, 4);
+//			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+		}
+//		r:  the radius in the polar representation of cartesian location x and y.  
+//		Obtain from x and y with RuntimeFunctions.polar_r.
+		else if(epn.kind==Kind.KW_r){
+			mv.visitVarInsn(ILOAD, 1);	//x
+			mv.visitVarInsn(ILOAD, 2);	//y
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "polar_r", "(II)I", false);
+			mv.visitVarInsn(ISTORE, 5);
+			mv.visitVarInsn(ILOAD, 5);
+		}
+//		 the angle, in degrees, in the polar representation of cartesian location x and y.  
+//		Obtain from x and y with RuntimeFunctions.polar_a.		
+		else if(epn.kind==Kind.KW_a){
+			mv.visitVarInsn(ILOAD, 1);	//x
+			mv.visitVarInsn(ILOAD, 2);	//y
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "polar_a", "(II)I", false);
+			mv.visitVarInsn(ISTORE, 6);
+			mv.visitVarInsn(ILOAD, 6);
+		}
+//		R: the upper bound on r, obtain from polar_r(X,Y)
+		else if(epn.kind==Kind.KW_R){
+			mv.visitVarInsn(ILOAD, 3);	//X
+			mv.visitVarInsn(ILOAD, 4);	//Y
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "polar_r", "(II)I", false);
+			mv.visitVarInsn(ISTORE, 7);
+			mv.visitVarInsn(ILOAD, 7);
+		}
+//		A:  the upper bound on a, obtain from polar_a(0,Y)
+		else if(epn.kind==Kind.KW_A){
+			mv.visitInsn(ICONST_0);	//0
+			mv.visitVarInsn(ILOAD, 4);	//y
+			mv.visitMethodInsn(INVOKESTATIC, "cop5556fa17/RuntimeFunctions", "polar_a", "(II)I", false);
+			mv.visitVarInsn(ISTORE, 8);
+			mv.visitVarInsn(ILOAD, 8);
+		}
+		else if(epn.kind==Kind.KW_DEF_X){
+			mv.visitLdcInsn(new Integer(256));
+		}
+		else if(epn.kind==Kind.KW_DEF_Y){
+			mv.visitLdcInsn(new Integer(256));
+		}
+		else if(epn.kind==Kind.KW_Z){
+			mv.visitLdcInsn(new Integer(16777215));
+		}
+		return null;
 	}
 
 
