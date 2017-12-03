@@ -250,9 +250,9 @@ public class TypeCheckVisitor implements ASTVisitor {
 		if(sa.lhs.getType() == sa.e.getType()){
 			sa.setCartesian(sa.lhs.isCartesian());
 		}
-		else{
-			throw new SemanticException(sa.firstToken, "Error: visitStatement_Assign: LHS.type != exp.type");
-		}
+//		else{
+//			throw new SemanticException(sa.firstToken, "Error: visitStatement_Assign: LHS.type != exp.type");
+//		}
 		return null;
 	}
 
@@ -269,7 +269,7 @@ public class TypeCheckVisitor implements ASTVisitor {
 //
 		index.e0.visit(this, arg);	//CHECK null
 		index.e1.visit(this, arg);
-		if(index.e0.getType()==Type.INTEGER && index.e1.getType()==Type.INTEGER){
+		if(index.e0.getType()==Type.INTEGER && index.e1.getType()==Type.INTEGER){		//PredefinedName Types are Interger
 			try{
 				Expression_PredefinedName exp0= (Expression_PredefinedName)index.e0;
 				Expression_PredefinedName exp1= (Expression_PredefinedName)index.e1;
